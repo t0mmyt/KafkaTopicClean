@@ -1,5 +1,6 @@
 package uk.tommyt.kafka.TopicClean;
 
+import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.TopicPartition;
 import org.slf4j.Logger;
@@ -8,15 +9,16 @@ import org.slf4j.LoggerFactory;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class DeltasConsumer implements AutoCloseable {
     private final Logger LOG = LoggerFactory.getLogger(getClass().getName());
 
-    private KafkaConsumer<Byte[], Byte[]> consumer;
+    private Consumer<byte[], byte[]> consumer;
 
-    DeltasConsumer(Properties properties) {
+    public DeltasConsumer(Properties properties) {
         Properties newProperties = new Properties();
         newProperties.putAll(properties);
         newProperties.put("key.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer");
@@ -24,16 +26,17 @@ public class DeltasConsumer implements AutoCloseable {
         this.consumer = new KafkaConsumer<>(newProperties);
     }
 
+    DeltasConsumer(Consumer<byte[], byte[]> consumer){
+        this.consumer = consumer;
+    }
+
     /**
      * Return a list of topics that match the regex provided by pattern
      */
-    public List<String> getTopicsForPattern(String pattern) {
+    public Set<String> getTopicsForPattern(String pattern) {
         LOG.debug("Searching for topics with regex: {}", pattern);
         Pattern p = Pattern.compile(pattern);
-        List<String> topics = consumer.listTopics().keySet()
-                .stream()
-                .filter(t -> p.matcher(t).find())
-                .collect(Collectors.toList());
+        Set<String> topics = filterByPattern(consumer.listTopics().keySet(), pattern);
         LOG.debug("Found {} topics", topics.size());
         return topics;
     }
@@ -61,5 +64,13 @@ public class DeltasConsumer implements AutoCloseable {
      */
     public void close() {
         consumer.close();
+    }
+
+    static Set<String> filterByPattern(Set<String> topics, String pattern) {
+        Pattern p = Pattern.compile(pattern);
+        return topics.stream()
+                .filter(t -> p.matcher(t).find())
+                .collect(Collectors.toSet());
+
     }
 }

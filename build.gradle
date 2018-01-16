@@ -1,7 +1,16 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+}
+
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '2.0.1'
+}
+
 group 'uk.tommyt.kafka'
 version '1.0-SNAPSHOT'
-
-apply plugin: 'java'
 
 sourceCompatibility = 1.8
 
@@ -9,10 +18,23 @@ repositories {
     mavenCentral()
 }
 
+jar {
+    manifest {
+        attributes (
+                'Main-Class': 'uk.tommyt.kafka.TopicClean'
+        )
+    }
+}
+
 dependencies {
-    compile group: 'org.apache.kafka', name: 'kafka_2.12', version: '1.0.0'
-    compile group: 'org.apache.curator', name: 'curator-client', version: '2.11.0'
-    compile group: 'org.apache.curator', name: 'curator-framework', version: '2.11.0'
-    compile group: 'org.apache.curator', name: 'curator-recipes', version: '2.11.0'
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile(
+            'junit:junit:4+'
+    )
+    compile (
+            'org.apache.kafka:kafka_2.12:1.0.0',
+            'org.apache.curator:curator-client:2.11.0',
+            'org.apache.curator:curator-framework:2.11.0',
+            'org.apache.curator:curator-recipes:2.11.0',
+
+    )
 }
