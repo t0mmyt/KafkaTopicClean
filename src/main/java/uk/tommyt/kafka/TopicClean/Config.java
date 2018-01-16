@@ -6,15 +6,21 @@ import java.util.Enumeration;
 import java.util.Properties;
 
 public class Config {
-    Properties properties = new Properties();
+    Properties properties;
 
     Config(String filename) throws IOException {
+        this.properties = new Properties();
         try (InputStream input = getClass().getResourceAsStream(filename)){
             if (input == null) {
                 throw new IOException(String.format("Could not open %s", filename));
             }
             properties.load(input);
         }
+    }
+
+    Config(Properties properties) {
+        this.properties = new Properties();
+        this.properties.putAll(properties);
     }
 
     Properties propertiesFor(String prefix) {

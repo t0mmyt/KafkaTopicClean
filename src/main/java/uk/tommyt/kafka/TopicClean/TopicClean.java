@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -37,8 +38,8 @@ public class TopicClean {
                 System.exit(103);
             } else {
                 try (
-                        AdminClient adminClient = AdminClient.create(config.propertiesFor("admin"));
-                        DeltasConsumer deltasConsumer = new DeltasConsumer(config.propertiesFor("consumer"))
+                        AdminClient adminClient = AdminClient.create(config.propertiesFor("kafka"));
+                        DeltasConsumer deltasConsumer = new DeltasConsumer(config.propertiesFor("kafka"))
                 ) {
                     DeleteTopicsResult result = adminClient.deleteTopics(
                             deltasConsumer.getTopicsForPattern(pattern)

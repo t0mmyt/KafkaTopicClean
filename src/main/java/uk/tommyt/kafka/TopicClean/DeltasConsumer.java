@@ -17,9 +17,16 @@ public class DeltasConsumer implements AutoCloseable {
     private KafkaConsumer<Byte[], Byte[]> consumer;
 
     DeltasConsumer(Properties properties) {
-        this.consumer = new KafkaConsumer<>(properties);
+        Properties newProperties = new Properties();
+        newProperties.putAll(properties);
+        newProperties.put("key.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer");
+        newProperties.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer");
+        this.consumer = new KafkaConsumer<>(newProperties);
     }
 
+    /**
+     * Return a list of topics that match the regex provided by pattern
+     */
     public List<String> getTopicsForPattern(String pattern) {
         LOG.debug("Searching for topics with regex: {}", pattern);
         Pattern p = Pattern.compile(pattern);
@@ -31,6 +38,10 @@ public class DeltasConsumer implements AutoCloseable {
         return topics;
     }
 
+    /**
+     * Get the "delta" for a topic, (delta in this case being the difference between the oldest and newest message or
+     * how many messages are available for consumption)
+     */
     public long getDeltaForTopic(String topic) {
         List<TopicPartition> partitions = consumer.partitionsFor(topic).stream().
                 map(i -> new TopicPartition(topic, i.partition())).collect(Collectors.toList());
@@ -45,6 +56,9 @@ public class DeltasConsumer implements AutoCloseable {
         return delta;
     }
 
+    /**
+     * Close the consumer
+     */
     public void close() {
         consumer.close();
     }
