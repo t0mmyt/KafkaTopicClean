@@ -8,8 +8,11 @@ import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -30,8 +33,8 @@ public class DeltasConsumerTest {
         nodes[0] = new Node(0, "node1", 9092);
         nodes[1] = new Node(1, "node2", 9092);
         nodes[2] = new Node(2, "node3", 9092);
-        topics = new String[] {"trx-1-pdc-sys", "trx-2-pdc-sys", "trx-3-pdc-sys"};
-        pattern = "^trx\\-\\d+\\-\\w+\\-\\w+";
+        topics = new String[] {"TRX-1-TRX-SYS", "TRX-2-PDC-SYS", "TRX-3-PDC-SYS",  "some_other_topic"};
+        pattern = "^TRX\\-\\d+\\-\\w+\\-\\w+";
         for (String topic: topics) {
             List<PartitionInfo> partitionInfos = new ArrayList<>();
             for (int j=0;j<12;j++) {
@@ -75,12 +78,12 @@ public class DeltasConsumerTest {
 
     @Test
     public void CheckPatternMatch() {
-        String pattern = "^trx\\-\\d+\\-\\w+\\-\\w+";
+        String pattern = "^TRX\\-\\d+\\-\\w+\\-\\w+";
         Set<String> topics = Stream.of(
                 "ignore-me",
-                "trx-1-a-eod",
-                "trx-123-pdc-sys",
-                "trx-9-sdc-chrono"
+                "TRX-1-a-EOD",
+                "TRX-123-PDC-SYS",
+                "TRX-9-SDC-CHRONO"
                 ).collect(Collectors.toSet());
         Set<String> selection = DeltasConsumer.filterByPattern(topics, pattern);
         assertEquals(3, selection.size());

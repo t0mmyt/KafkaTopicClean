@@ -15,9 +15,11 @@ import java.util.stream.Collectors;
 
 public class DeltasConsumer implements AutoCloseable {
     private final Logger LOG = LoggerFactory.getLogger(getClass().getName());
-
     private Consumer<byte[], byte[]> consumer;
 
+    /**
+     * Create a KafkaConsumer from properties.  Does not use key.serializer or value.serializer
+     */
     public DeltasConsumer(Properties properties) {
         Properties newProperties = new Properties();
         newProperties.putAll(properties);
@@ -26,6 +28,9 @@ public class DeltasConsumer implements AutoCloseable {
         this.consumer = new KafkaConsumer<>(newProperties);
     }
 
+    /**
+     * Use a pre-fabricated consumer, e.g. MockConsumer for testing or custom serializers if required
+     */
     DeltasConsumer(Consumer<byte[], byte[]> consumer){
         this.consumer = consumer;
     }
@@ -35,7 +40,6 @@ public class DeltasConsumer implements AutoCloseable {
      */
     public Set<String> getTopicsForPattern(String pattern) {
         LOG.debug("Searching for topics with regex: {}", pattern);
-        Pattern p = Pattern.compile(pattern);
         Set<String> topics = filterByPattern(consumer.listTopics().keySet(), pattern);
         LOG.debug("Found {} topics", topics.size());
         return topics;
